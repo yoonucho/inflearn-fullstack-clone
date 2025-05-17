@@ -64,7 +64,7 @@ export default function InstructorSidebar() {
 					<Button
 						key={item.label}
 						variant="link"
-						className={`justify-start w-full text-base font-medium ${isActive ? "bg-white text-green-700" : ""}`}
+						className={`justify-start w-full text-base font-medium ${isActive ? "bg-white text-primary font-bold" : "text-gray-700"}`}
 						onClick={isPreparing ? alertPreparing : undefined}
 						asChild={!isPreparing}
 					>
