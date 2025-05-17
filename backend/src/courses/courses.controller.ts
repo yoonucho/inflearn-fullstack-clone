@@ -25,7 +25,7 @@ import { Request } from 'express';
 import { Prisma } from '@prisma/client';
 import { Course as CourseEntity } from 'src/_gen/prisma-class/course';
 
-@ApiTags('Courses')
+@ApiTags('코스')
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
