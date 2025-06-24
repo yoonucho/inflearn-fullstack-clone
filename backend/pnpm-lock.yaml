@@ -11,6 +11,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.812.0
         version: 3.812.0
+      '@nestjs/class-transformer':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.0(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -59,9 +62,9 @@ importers:
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
-      slug:
-        specifier: ^10.0.0
-        version: 10.0.0
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -911,6 +914,9 @@ packages:
   '@napi-rs/nice@1.0.1':
     resolution: {integrity: sha512-zM0mVWSXE0a0h9aKACLwKmD6nHcRiKrPpCfvaKqG1CqDEyjEawId0ocXxVzPMCAm6kkWr2P025msfxXEnt8UGQ==}
     engines: {node: '>= 10'}
+
+  '@nestjs/class-transformer@0.4.0':
+    resolution: {integrity: sha512-aHKhqPVixFCo8m7n2iP1uGgfyF0eYlAgGJKfW27l0BvRCTPBjmoL4956Cf9xVu6WNJzVsp//SOcpIavdnNHYZg==}
 
   '@nestjs/cli@11.0.7':
     resolution: {integrity: sha512-svrP8j1R0/lQVJ8ZI3BlDtuZxmkvVJokUJSB04sr6uibunk2wHeVDDVLZvYBUorCdGU/RHJl1IufhqUBM91vAQ==}
@@ -3647,9 +3653,9 @@ packages:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
 
-  slug@10.0.0:
-    resolution: {integrity: sha512-M8s2PWOUeSCdD4S1NH5lCzXg2zFV1fozrtfr0FSKl65x+EF1rUowj+/vyFlnHgxPxWzT+DL0VXKfYc1DHJoymg==}
-    hasBin: true
+  slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
+    engines: {node: '>=8.0.0'}
 
   snake-case@3.0.4:
     resolution: {integrity: sha512-LAOh4z89bGQvl9pFfNF8V146i7o7/CqFPbqzYgP+yYzDIDeS9HaNFtXABamRW+AQzEVODcvE79ljJ+8a9YSdMg==}
@@ -5304,6 +5310,8 @@ snapshots:
       '@napi-rs/nice-win32-ia32-msvc': 1.0.1
       '@napi-rs/nice-win32-x64-msvc': 1.0.1
     optional: true
+
+  '@nestjs/class-transformer@0.4.0': {}
 
   '@nestjs/cli@11.0.7(@swc/cli@0.6.0(@swc/core@1.11.24)(chokidar@4.0.3))(@swc/core@1.11.24)(@types/node@22.15.17)':
     dependencies:
@@ -8481,7 +8489,7 @@ snapshots:
 
   slash@3.0.0: {}
 
-  slug@10.0.0: {}
+  slugify@1.6.6: {}
 
   snake-case@3.0.4:
     dependencies:
