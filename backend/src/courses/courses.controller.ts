@@ -22,7 +22,7 @@ import { Request } from 'express';
 import { Course as CourseEntity } from 'src/_gen/prisma-class/course';
 import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
 import { CoursesService } from './courses.service';
-import { CourseDetailDto } from './dto/course-detail-dto';
+import { CourseDetailDto } from './dto/course-detail.dto';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
 import { SearchCourseResponseDto } from './dto/search-response.dto';
@@ -94,11 +94,13 @@ export class CoursesController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalAccessTokenGuard)
+  @ApiBearerAuth('access-token')
   @ApiOkResponse({
     description: '코스 상세 정보',
     type: CourseDetailDto,
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  findOne(@Req() req: Request, @Param('id', ParseUUIDPipe) id: string) {
     return this.coursesService.findOne(id);
   }
 
@@ -171,5 +173,13 @@ export class CoursesController {
   @ApiOkResponse({ type: CourseFavoriteEntity, isArray: true })
   getMyFavorites(@Req() req: Request) {
     return this.coursesService.getMyFavorites(req.user.sub);
+  }
+
+  @Post(':id/enroll')
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOkResponse({ type: Boolean })
+  enrollCourse(@Req() req: Request, @Param('id', ParseUUIDPipe) id: string) {
+    return this.coursesService.enrollCourse(id, req.user.sub);
   }
 }

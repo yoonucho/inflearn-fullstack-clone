@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,9 +9,9 @@ import { Course, Prisma } from '@prisma/client';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import slugify from 'lib/slugify';
-import { SearchCourseResponseDto } from './dto/search-response.dto';
 import { SearchCourseDto } from './dto/search-course.dto';
-import { CourseDetailDto } from './dto/course-detail-dto';
+import { SearchCourseResponseDto } from './dto/search-response.dto';
+import { CourseDetailDto } from './dto/course-detail.dto';
 import { GetFavoriteResponseDto } from './dto/favorite.dto';
 import { CourseFavorite as CourseFavoriteEntity } from 'src/_gen/prisma-class/course_favorite';
 
@@ -50,7 +51,7 @@ export class CoursesService {
     });
   }
 
-  async findOne(id: string): Promise<CourseDetailDto | null> {
+  async findOne(id: string, userId?: string): Promise<CourseDetailDto | null> {
     const course = await this.prisma.course.findUnique({
       where: { id },
       include: {
@@ -73,11 +74,6 @@ export class CoursesService {
         enrollments: true,
         sections: {
           include: {
-            _count: {
-              select: {
-                lectures: true,
-              },
-            },
             lectures: {
               select: {
                 id: true,
@@ -109,20 +105,20 @@ export class CoursesService {
       return null;
     }
 
-    // 평균 평점 계산
+    const isEnrolled = userId
+      ? !!(await this.prisma.courseEnrollment.findFirst({
+          where: {
+            userId,
+            courseId: id,
+          },
+        }))
+      : false;
+
     const averageRating =
       course.reviews.length > 0
         ? course.reviews.reduce((sum, review) => sum + review.rating, 0) /
           course.reviews.length
         : 0;
-
-    // 총 렉처 수 계산
-    const totalLectures = course.sections.reduce(
-      (sum, section) => sum + section._count.lectures,
-      0,
-    );
-
-    // 총 강의 시간 계산
     const totalDuration = course.sections.reduce(
       (sum, section) =>
         sum +
@@ -135,10 +131,11 @@ export class CoursesService {
 
     const result = {
       ...course,
+      isEnrolled,
       totalEnrollments: course._count.enrollments,
       averageRating: Math.round(averageRating * 10) / 10,
       totalReviews: course._count.reviews,
-      totalLectures,
+      totalLectures: course._count.lectures,
       totalDuration,
     };
 
@@ -159,7 +156,7 @@ export class CoursesService {
     }
 
     const { categoryIds, ...otherData } = updateCourseDto;
-    const data: Prisma.CourseUpdateInput = {
+    let data: Prisma.CourseUpdateInput = {
       ...otherData,
     };
 
@@ -392,5 +389,32 @@ export class CoursesService {
     });
 
     return existingFavorites as unknown as CourseFavoriteEntity[];
+  }
+
+  async enrollCourse(courseId: string, userId: string): Promise<boolean> {
+    try {
+      const existingEnrollment = await this.prisma.courseEnrollment.findFirst({
+        where: {
+          userId,
+          courseId,
+        },
+      });
+
+      if (existingEnrollment) {
+        throw new ConflictException('이미 수강신청한 강의입니다.');
+      }
+
+      await this.prisma.courseEnrollment.create({
+        data: {
+          userId,
+          courseId,
+          enrolledAt: new Date(),
+        },
+      });
+
+      return true;
+    } catch (err) {
+      throw new Error(err);
+    }
   }
 }
