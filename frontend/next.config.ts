@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cdn.inflearn.com",
+        hostname: process.env.CLOUDFRONT_DOMAIN as string,
       },
     ],
   },
