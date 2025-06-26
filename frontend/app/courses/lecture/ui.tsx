@@ -18,8 +18,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeftIcon,
   CheckCircle2,
+  Loader2,
   LockIcon,
+  MessageSquareIcon,
   PlayCircleIcon,
+  StarIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -44,6 +47,15 @@ import {
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import * as api from "@/lib/api";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 /*****************
  * Helper Utils  *
@@ -188,12 +200,151 @@ const ReactPlayer = dynamic(() => import("react-player"), {
   ),
 });
 
+function InteractiveStarRating({
+  rating,
+  onRatingChange,
+}: {
+  rating: number;
+  onRatingChange: (rating: number) => void;
+}) {
+  const [hoverRating, setHoverRating] = useState(rating);
+
+  return (
+    <div className="flex items-center gap-1">
+      {Array.from({ length: 5 }).map((_, i) => {
+        const starValue = i + 1;
+        const isActive = starValue <= (hoverRating || rating);
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onRatingChange(starValue)}
+            onMouseEnter={() => setHoverRating(starValue)}
+            onMouseLeave={() => setHoverRating(0)}
+            className="p-1 transition-colors"
+          >
+            <StarIcon
+              className={cn(
+                "size-8 transition-colors",
+                isActive
+                  ? "fill-yellow-400 stroke-yellow-400"
+                  : "stroke-gray-300 hover:stroke-yellow-400"
+              )}
+            />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ReviewModal({
+  courseId,
+  isOpen,
+  onClose,
+  setShowReviewModal,
+}: {
+  courseId: string;
+  isOpen: boolean;
+  onClose: () => void;
+  setShowReviewModal: (show: boolean) => void;
+}) {
+  const [rating, setRating] = useState(0);
+  const [content, setContent] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      setRating(0);
+      setContent("");
+    }
+  }, [isOpen]);
+
+  const createReviewMutation = useMutation({
+    mutationFn: () =>
+      api.createReview(courseId, {
+        content,
+        rating,
+      }),
+    onSuccess: () => {
+      toast.success("수강평이 등록되었습니다.");
+      setShowReviewModal(false);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "수강평 등록에 실패했습니다.");
+    },
+  });
+
+  const handleSubmit = () => {
+    if (rating === 0) {
+      alert("별점을 선택해주세요.");
+      return;
+    }
+    if (!content.trim()) {
+      alert("수강평을 작성해주세요.");
+      return;
+    }
+
+    createReviewMutation.mutate();
+  };
+
+  const isLoading = createReviewMutation.isPending;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-center text-lg font-semibold">
+            힘이 되는 수강평을 남겨주세요!
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          <div className="flex justify-center">
+            <InteractiveStarRating rating={rating} onRatingChange={setRating} />
+          </div>
+
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="수강평을 작성해보세요!"
+            className="w-full h-32 p-3 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+
+        <DialogFooter className="flex gap-2">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+          >
+            취소
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors disabled:opacity-50"
+          >
+            {isLoading ? (
+              <Loader2 size={20} className="animate-spin" />
+            ) : (
+              <span>저장하기</span>
+            )}
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function VideoPlayer({
   lecture,
   lectureActivity,
+  courseId,
+  user,
 }: {
   lecture: LectureEntity;
   lectureActivity?: LectureActivityEntity;
+  courseId: string;
+  user?: User;
 }) {
   const router = useRouter();
   const updateLectureActivityMutation = useMutation({
@@ -335,7 +486,6 @@ function VideoPlayer({
           }
         }}
       />
-
       {/* Lecture title overlay */}
       <div className="absolute top-2 left-2 flex items-center">
         <button className="cursor-pointer" onClick={() => router.back()}>
@@ -345,7 +495,6 @@ function VideoPlayer({
           {lecture.title}
         </span>
       </div>
-
       {/* Center play/pause button */}
       {(!playing || (playing && isHovering)) && (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -362,7 +511,6 @@ function VideoPlayer({
           </button>
         </div>
       )}
-
       {/* Controls */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-3 pt-2 bg-black/70 backdrop-blur flex flex-col gap-2 text-white">
         {/* progress slider */}
@@ -414,6 +562,17 @@ function VideoPlayer({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 수강평 버튼 */}
+            {user && (
+              <button
+                onClick={() => setShowReviewModal(true)}
+                className="flex items-center gap-1 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-md transition-colors"
+                aria-label="수강평 작성"
+              >
+                <MessageSquareIcon className="size-3" />
+                <span>수강평</span>
+              </button>
+            )}
             {/* speed select */}
             <Select
               value={playbackRate.toString()}
@@ -430,7 +589,6 @@ function VideoPlayer({
                 ))}
               </SelectContent>
             </Select>
-
             {/* fullscreen */}
             <button onClick={toggleFullscreen} aria-label="fullscreen">
               {isFullscreen ? (
@@ -442,6 +600,13 @@ function VideoPlayer({
           </div>
         </div>
       </div>
+      {/* Review Modal */}Add commentMore actions
+      <ReviewModal
+        courseId={courseId}
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        setShowReviewModal={setShowReviewModal}
+      />
     </div>
   );
 }
@@ -485,10 +650,12 @@ export default function UI({
   course,
   lectureId,
   lectureActivities,
+  user,
 }: {
   course: CourseDetailDto;
   lectureId?: string;
   lectureActivities: LectureActivityEntity[];
+  user?: User;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -529,6 +696,8 @@ export default function UI({
           lectureActivity={lectureActivities.find(
             (activity) => activity.lectureId === currentLectureId
           )}
+          courseId={course.id}
+          user={user}
         />
 
         {/* Floating button to open sidebar when closed */}

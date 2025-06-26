@@ -4,9 +4,12 @@ import {
   categoriesControllerFindAll,
   coursesControllerAddFavorite,
   coursesControllerCreate,
+  coursesControllerCreateReview,
+  coursesControllerDeleteReview,
   coursesControllerEnrollCourse,
   coursesControllerFindAllMyCourses,
   coursesControllerFindOne,
+  coursesControllerGetCourseReviews,
   coursesControllerGetFavorite,
   coursesControllerGetLectureActivity,
   coursesControllerGetMyFavorites,
@@ -14,6 +17,8 @@ import {
   coursesControllerSearch,
   coursesControllerUpdate,
   CoursesControllerUpdateData,
+  coursesControllerUpdateReview,
+  CreateReviewDto,
   lecturesControllerCreate,
   lecturesControllerDelete,
   lecturesControllerUpdate,
@@ -26,6 +31,7 @@ import {
   UpdateCourseDto,
   UpdateLectureActivityDto,
   UpdateLectureDto,
+  UpdateReviewDto,
   UpdateUserDto,
   usersControllerGetProfile,
   usersControllerUpdateProfile,
@@ -275,4 +281,60 @@ export const getAllLectureActivities = async (courseId: string) => {
   });
 
   return { data, error };
+};
+
+export const getCourseReviews = async (
+  courseId: string,
+  page: number,
+  pageSize: number,
+  sort: "latest" | "oldest" | "rating_high" | "rating_low" = "latest"
+) => {
+  const { data, error } = await coursesControllerGetCourseReviews({
+    path: {
+      courseId,
+    },
+    query: {
+      page,
+      pageSize,
+      sort,
+    },
+  });
+
+  return { data, error };
+};
+
+export const createReview = async (
+  courseId: string,
+  createReviewDto: CreateReviewDto
+) => {
+  const { data, error } = await coursesControllerCreateReview({
+    path: {
+      courseId,
+    },
+    body: createReviewDto,
+  });
+
+  return { data, error };
+};
+
+export const updateReview = async (
+  reviewId: string,
+  updateReviewDto: UpdateReviewDto
+) => {
+  const { data, error } = await coursesControllerUpdateReview({
+    path: {
+      reviewId,
+    },
+    body: updateReviewDto,
+  });
+
+  return { data, error };
+};
+
+export const deleteReview = async (reviewId: string) => {
+  const { data, error } = await coursesControllerDeleteReview({
+    path: {
+      reviewId,
+    },
+  });
 };
