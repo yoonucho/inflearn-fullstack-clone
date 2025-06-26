@@ -25,7 +25,7 @@ import { Lecture as LectureEntity } from 'src/_gen/prisma-class/lecture';
 import { Request } from 'express';
 import { UpdateLectureDto } from './dto/update-lecture.dto';
 import { LectureActivity as LectureActivityEntity } from 'src/_gen/prisma-class/lecture_activity';
-import { UpdateLectureActivityDto } from 'src/courses/dto/update-lecture-activity.dto';
+import { UpdateLectureActivityDto } from './dto/update-lecture-activity.dto';
 
 @ApiTags('개별 강의')
 @Controller('lectures')
