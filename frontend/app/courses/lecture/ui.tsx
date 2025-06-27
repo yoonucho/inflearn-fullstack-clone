@@ -23,6 +23,14 @@ import {
   MessageSquareIcon,
   PlayCircleIcon,
   StarIcon,
+  PauseIcon,
+  PlayIcon,
+  Volume2Icon,
+  VolumeXIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  ListIcon,
+  XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -35,27 +43,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  PauseIcon,
-  PlayIcon,
-  Volume2Icon,
-  VolumeXIcon,
-  MaximizeIcon,
-  MinimizeIcon,
-  ListIcon,
-  XIcon,
-} from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import * as api from "@/lib/api";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { User } from "next-auth";
 
 /*****************
  * Helper Utils  *
@@ -214,6 +213,7 @@ function InteractiveStarRating({
       {Array.from({ length: 5 }).map((_, i) => {
         const starValue = i + 1;
         const isActive = starValue <= (hoverRating || rating);
+
         return (
           <button
             key={i}
@@ -347,6 +347,8 @@ function VideoPlayer({
   user?: User;
 }) {
   const router = useRouter();
+  const [showReviewModal, setShowReviewModal] = useState(false);
+
   const updateLectureActivityMutation = useMutation({
     mutationFn: (updateLectureActivityDto: UpdateLectureActivityDto) =>
       api.updateLectureActivity(lecture.id, updateLectureActivityDto),
@@ -487,7 +489,7 @@ function VideoPlayer({
         }}
       />
       {/* Lecture title overlay */}
-      <div className="absolute top-2 left-2 flex items-center">
+      <div className="absolute z-40 top-2 left-2 flex items-center">
         <button className="cursor-pointer" onClick={() => router.back()}>
           <ArrowLeftIcon color="white" size={20} />
         </button>
@@ -600,7 +602,7 @@ function VideoPlayer({
           </div>
         </div>
       </div>
-      {/* Review Modal */}Add commentMore actions
+      {/* Review Modal */}
       <ReviewModal
         courseId={courseId}
         isOpen={showReviewModal}
