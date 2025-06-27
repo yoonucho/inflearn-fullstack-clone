@@ -24,6 +24,18 @@ import { UpdateQuestionDto } from './dto/update-question.dto';
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
+  @Get('instructor/questions')
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOkResponse({
+    description: '지식공유자의 모든 질문 조회',
+    type: CourseQuestionEntity,
+    isArray: true,
+  })
+  findAllByInstructorId(@Req() req: Request) {
+    return this.questionsService.findAllByInstructorId(req.user.sub);
+  }
+
   @Get('courses/:courseId/questions')
   @ApiOkResponse({
     description: '강의 질문 목록 조회',
