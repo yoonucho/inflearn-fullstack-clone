@@ -14,6 +14,7 @@ import { CommentsModule } from './comments/comments.module';
 import { QuestionsModule } from './questions/questions.module';
 import { CartsModule } from './carts/carts.module';
 import { PaymentsModule } from './payments/payments.module';
+import { BatchModule } from './batch/batch.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PaymentsModule } from './payments/payments.module';
     QuestionsModule,
     CartsModule,
     PaymentsModule,
+    BatchModule,
     // Add other modules here
   ],
   controllers: [AppController],
