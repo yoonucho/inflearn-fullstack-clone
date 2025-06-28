@@ -18,6 +18,7 @@ import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
 import { Request } from 'express';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
+import { QuestionWithCommentCountDto } from './dto/question-with-comment-count.dto';
 
 @ApiTags('질문')
 @Controller('')
@@ -29,7 +30,7 @@ export class QuestionsController {
   @ApiBearerAuth('access-token')
   @ApiOkResponse({
     description: '지식공유자의 모든 질문 조회',
-    type: CourseQuestionEntity,
+    type: QuestionWithCommentCountDto,
     isArray: true,
   })
   findAllByInstructorId(@Req() req: Request) {

@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import * as jwt from "jsonwebtoken";
 
 const AUTH_COOKIE_NAME =
-  process.env.NODE_ENV === "production"
+  process.env.USE_HTTPS === "true"
     ? "__Secure-authjs.session-token"
     : "authjs.session-token";
 
